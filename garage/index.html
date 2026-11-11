@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Garage Fight · Lost City</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div id="app">
+  <a class="cityReturn" href="../">Back to Lost City</a>
+
+  <div id="game"></div>
+
+  <div id="headlight" aria-hidden="true"></div>
+  <div id="taillight" aria-hidden="true"></div>
+  <div id="bulb" aria-hidden="true"></div>
+  <div id="grade" aria-hidden="true"></div>
+  <div id="grain" aria-hidden="true"></div>
+  <div id="edgeflash" aria-hidden="true"></div>
+
+  <div id="hud" aria-hidden="true">
+    <div class="hudSide left">
+      <div class="portraitBox">
+        <img id="p1Portrait" src="assets/klo_portrait.png" alt="">
+        <span id="p1Name" class="pname">KING LO</span>
+      </div>
+      <div class="stack">
+        <div class="barRow health">
+          <img class="frame" src="assets/hud_kit_01_health_frame.webp" alt="">
+          <div id="p1Health" class="fill healthFill playerFill"></div>
+          <div id="p1HealthFlash" class="lastFlash"></div>
+        </div>
+        <div class="barRow super">
+          <img class="frame" src="assets/hud_kit_03_super_frame.webp" alt="">
+          <div id="p1Super" class="fill superFill"></div>
+          <div class="superTag">SUPER</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hudCenter">
+      <div class="timerPlate">
+        <img src="assets/hud_kit_05_timer_plate.webp" alt="">
+        <span id="timer" class="timerNum">45</span>
+      </div>
+      <div class="pips" id="pips">
+        <img class="pip" data-side="king" data-n="0" src="assets/hud_kit_07_round_pip.webp" alt="">
+        <img class="pip" data-side="king" data-n="1" src="assets/hud_kit_07_round_pip.webp" alt="">
+        <img class="pip rival" data-side="rivet" data-n="0" src="assets/hud_kit_07_round_pip.webp" alt="">
+        <img class="pip rival" data-side="rivet" data-n="1" src="assets/hud_kit_07_round_pip.webp" alt="">
+      </div>
+    </div>
+
+    <div class="hudSide right">
+      <div class="portraitBox">
+        <img id="p2Portrait" src="assets/rivet_portrait.png" alt="">
+        <span id="p2Name" class="pname">RIVET</span>
+      </div>
+      <div class="stack">
+        <div class="barRow health">
+          <img class="frame mirrored" src="assets/hud_kit_01_health_frame.webp" alt="">
+          <div id="p2Health" class="fill healthFill rivalFill"></div>
+          <div id="p2HealthFlash" class="lastFlash"></div>
+        </div>
+        <div class="barRow super">
+          <img class="frame mirrored" src="assets/hud_kit_03_super_frame.webp" alt="">
+          <div id="p2Super" class="fill superFill rightGrow"></div>
+          <div class="superTag">SUPER</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="comboPlate">
+      <img src="assets/hud_kit_06_combo_plate.webp" alt="">
+      <span id="comboNum" class="comboNum">2</span>
+      <span class="comboWord">COMBO</span>
+    </div>
+  </div>
+
+  <div id="callout" aria-live="polite"></div>
+  <div id="dmgLayer"></div>
+
+  <div id="touch" class="off" aria-hidden="true">
+    <div id="stick">
+      <img class="stickBase" src="assets/touch_controls_01_stick_base.webp" alt="">
+      <img id="stickKnob" class="stickKnob" src="assets/touch_controls_02_stick_knob.webp" alt="">
+      <span class="stickLabel">MOVE · A D</span>
+    </div>
+    <div id="pad">
+      <button class="tbtn special" data-btn="special" aria-label="Special move, I"><img src="assets/touch_controls_06_btn_special.webp" alt=""><span>SPECIAL<i>I</i></span></button>
+      <button class="tbtn block" data-btn="block" aria-label="Block, L"><img src="assets/touch_controls_05_btn_block.webp" alt=""><span>BLOCK<i>L</i></span></button>
+      <button class="tbtn light" data-btn="light" aria-label="Light attack, J"><img src="assets/touch_controls_03_btn_light.webp" alt=""><span>LIGHT<i>J</i></span></button>
+      <button class="tbtn heavy" data-btn="heavy" aria-label="Heavy attack, K"><img src="assets/touch_controls_04_btn_heavy.webp" alt=""><span>HEAVY<i>K</i></span></button>
+    </div>
+  </div>
+
+  <div id="hint" class="hint">MOVE · LIGHT · HEAVY · BLOCK · SPECIAL</div>
+
+  <div id="titleScreen">
+    <div class="titleTop">
+      <div class="sign" id="sign">
+        <img class="wordmark" src="assets/lc_wordmark.webp" alt="&quot;Lost City&quot; Turf Wars">
+      </div>
+      <div class="subline">THE HILL · 1995</div>
+    </div>
+
+    <div class="titlePrompt">CHOOSE YOUR FIGHTER</div>
+
+    <div class="selectRow">
+      <button class="pick" id="pickKing" data-fighter="king" aria-label="Pick King Lo, the man">
+        <span class="pickPortrait"><img src="assets/klo_portrait.png" alt=""></span>
+        <span class="pickText"><b>KING LO</b><em>TITLE HOLDER · MAN</em></span>
+      </button>
+      <div class="vsMark">VS</div>
+      <button class="pick" id="pickRivet" data-fighter="rivet" aria-label="Pick Rivet, the woman">
+        <span class="pickPortrait"><img src="assets/rivet_portrait.png" alt=""></span>
+        <span class="pickText"><b>RIVET</b><em>CHALLENGER · WOMAN</em></span>
+      </button>
+    </div>
+
+    <div class="startRow">
+      <div class="modeRow">
+        <button id="startBtn" class="contBtn fightBtn" disabled><b>GARAGE FIGHT</b><em>ONE ON ONE</em></button>
+      </div>
+      <div id="padHint" class="padHint" hidden>STICK PICKS · A / ✕ START · X / □ LIGHT · Y / △ HEAVY · B / ○ SPECIAL · LB RB / L1 R1 BLOCK</div>
+      <div class="legend">A D MOVE · J K LIGHT HEAVY · L BLOCK · I SPECIAL</div>
+    </div>
+  </div>
+
+  <div id="matchOver">
+    <div class="moPlate">
+      <div class="moKicker">THE BAY · NIGHT SHIFT</div>
+      <div class="moTitle" id="moTitle">YOU WIN</div>
+      <div class="moSub" id="moSub">2 ROUNDS · BEST COMBO 0</div>
+      <div class="moBtns">
+        <button id="rematchBtn" class="moBtn">REMATCH</button>
+        <button id="changeBtn" class="moBtn ghost">CHANGE FIGHTER</button>
+      </div>
+    </div>
+  </div>
+
+
+  <button id="soundBtn" aria-label="Toggle sound">SOUND ON</button>
+  <div id="loading">WARMING UP THE BAY</div>
+
+</div>
+
+<script src="phaser.min.js"></script>
+<script src="pad.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

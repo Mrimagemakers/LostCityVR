@@ -31,6 +31,12 @@ Open [http://127.0.0.1:8080](http://127.0.0.1:8080) in a WebGL-capable browser. 
 5. Buy **Rail House** for $120 to heal and unlock a respawn point. **Night Owl Garage** costs $230 and 2 reputation. **Blue Hour Café** costs $340 and 4 reputation. Businesses accumulate income every 45 seconds of play. Visit them to collect it. Deliveries and purchases build district influence. Reach the local target shown on the minimap to take control and boost local business income by 50%.
 6. **Open Frequency** is repeatable after the story jobs. Reload from the same browser and address to resume cash, properties, health, district influence, position, and the current job. Saves are per browser and origin. If storage is unavailable, the HUD shows that saving failed.
 
+## Garage Fight
+
+Choose **Garage Fight** from the title or pause screen. Play as King Lo or Rivet in a best-of-three match against the other fighter. Use A/D or the arrows to move, J/K for light and heavy attacks, L to block, and I for a special. Touch controls and standard Xbox/PlayStation controller mappings are also available.
+
+Select **Back to Lost City** to return to the city title and resume your saved progress. Garage Fight runs in a regular browser tab and has no effect on mission progress or cash. The city's separate rival encounters still use the existing Turf Wars roster.
+
 ## Test and deploy
 
 ```sh
@@ -39,7 +45,7 @@ node --test
 
 The simulation tests cover a complete delivery under pursuit, shoves, defeat recovery, property gates, business income, save/restore, and collision.
 
-For a static host, publish `index.html`, `style.css`, `main.js`, `city.js`, `sim.js`, `world.js`, and the entire `vendor/` folder. Keep the directory structure and enable HTTPS. Routes use relative paths, so deployment under a subdirectory works. There is no backend.
+For a static host, publish `index.html`, `style.css`, `main.js`, `city.js`, `sim.js`, `world.js`, `turf-wars.js`, and the entire `vendor/` and `garage/` folders. Keep the directory structure and enable HTTPS. Routes use relative paths, so deployment under a subdirectory works. There is no backend.
 
 For a Quest 3 check, open the HTTPS deployment in Meta Quest Browser and select **Enter VR**. Confirm headset tracking, left-stick movement, right-stick turning, both triggers, the in-headset job HUD, and a save after exiting VR. Browser or device support determines whether the VR button appears. [Three.js WebXR setup](https://threejs.org/manual/#en/webxr-basics)
 

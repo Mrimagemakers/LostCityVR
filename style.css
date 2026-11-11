@@ -78,3 +78,9 @@ body.coarse.playing footer{left:108px}
 #turfBattle .turfExit{position:absolute;right:12px;top:10px;border-color:#b95b50;color:#ffe8df;background:#291d25}
 body.turfFighting #world{pointer-events:none}
 @media(max-width:590px){#fightChallenge{left:auto;right:10px;bottom:112px;font-size:11px;padding:9px}#turfBattle{padding:5px}#turfBattle canvas{width:100%;max-height:60dvh}#turfBattle .turfControls{gap:4px}#turfBattle .turfControls button{padding:12px 8px;font-size:11px}}
+#gate .garage-link {
+  display: inline-block;
+  margin: 0 0.75rem;
+  padding: 0.75rem 0.25rem;
+  color: #ffdb97;
+}
