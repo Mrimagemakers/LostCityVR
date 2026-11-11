@@ -66,3 +66,15 @@ body.coarse.playing .radio{bottom:110px}
 body.coarse.playing footer{left:108px}
 @media(max-width:590px){header{left:12px;right:12px;top:13px}.brief{left:12px;top:72px}.radar{right:12px;top:72px}#map{width:95px;height:95px}.radio{left:12px;max-width:calc(100vw - 24px)}.stats div{padding:5px 7px}.stats strong{font-size:14px}.brand{font-size:21px}}
 @media(max-height:460px){h1{font-size:64px}.intro p{margin:8px 0}.brief{top:68px}.radar{top:68px}#map{width:78px;height:78px}.gate{padding-block:10px}}
+
+/* Turf Wars 2D interludes, framed with the 1995 street-fighter HUD aesthetic. */
+#fightChallenge{position:fixed;z-index:3;bottom:54px;left:24px;background:#bd8946;color:#15121a;border:2px solid #f3d59d;padding:12px 17px;font-size:13px;font-weight:900;box-shadow:0 5px 24px #0009}
+#fightChallenge[hidden],#turfBattle[hidden]{display:none!important}
+#turfBattle{position:fixed;z-index:20;inset:0;background:#11131b;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;touch-action:none}
+#turfBattle canvas{display:block;width:min(100%,calc((100dvh - 106px)*1.77778));max-height:calc(100dvh - 106px);aspect-ratio:16/9;object-fit:contain;background:#272730;box-shadow:0 0 0 2px #b99453,0 15px 45px #0009}
+#turfBattle .turfControls{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:10px;width:100%;max-width:950px}
+#turfBattle .turfControls button{min-width:52px;border:1px solid #d6ac69;background:#24202b;padding:12px 14px;color:#f5e7d2;letter-spacing:.05em}
+#turfBattle .turfControls button:active{background:#a87837}
+#turfBattle .turfExit{position:absolute;right:12px;top:10px;border-color:#b95b50;color:#ffe8df;background:#291d25}
+body.turfFighting #world{pointer-events:none}
+@media(max-width:590px){#fightChallenge{left:auto;right:10px;bottom:112px;font-size:11px;padding:9px}#turfBattle{padding:5px}#turfBattle canvas{width:100%;max-height:60dvh}#turfBattle .turfControls{gap:4px}#turfBattle .turfControls button{padding:12px 8px;font-size:11px}}
