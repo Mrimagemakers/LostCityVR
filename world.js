@@ -106,6 +106,70 @@ function createDetailSurfaces(scene,buildings) {
   }
 }
 
+
+function addStreetLife(scene) {
+  const shared={
+    metal:new T.MeshStandardMaterial({color:0x454947,metalness:.54,roughness:.58}),
+    wood:new T.MeshStandardMaterial({color:0x5f483a,roughness:1}),
+    dark:new T.MeshStandardMaterial({color:0x24272a,roughness:.8}),
+    lamp:new T.MeshBasicMaterial({color:0xffd6a1}),
+    foliage:new T.MeshStandardMaterial({color:0x2f4938,roughness:1})
+  };
+  const unit=new T.BoxGeometry(1,1,1);
+  const addBox=(parent,material,x,y,z,w,h,d)=>{
+    const m=new T.Mesh(unit,material);m.position.set(x,y,z);m.scale.set(w,h,d);parent.add(m);return m;
+  };
+  // Period-appropriate streetlight fixtures and corner trash cans.
+  for(const [i,x] of [-72,-36,0,36,72].entries()) for(const z of [-72,-36,0,36,72]) {
+    const post=new T.Group();post.position.set(x+8.2,0,z+8.2);
+    addBox(post,shared.metal,0,2.05,0,.11,4.1,.11);
+    addBox(post,shared.metal,-.49,4.02,0,1.07,.085,.1);
+    addBox(post,shared.lamp,-.94,3.97,0,.24,.06,.32);
+    if((i+Math.abs(z/36))%2===0){
+      addBox(post,shared.dark,.64,.38,0,.65,.75,.56);
+      addBox(post,shared.metal,.64,.77,0,.76,.08,.69);
+    }
+    scene.add(post);
+  }
+  // Park benches, utility boxes and payphones ground the 1995 setting.
+  for(const [x,z] of [[-25,11],[-55,13],[19,-24],[47,20]]){
+    const g=new T.Group();g.position.set(x,0,z);
+    addBox(g,shared.wood,0,.52,0,2.2,.17,.62);
+    addBox(g,shared.wood,0,1.04,.29,2.2,.85,.14);
+    for(const dx of [-.84,.84]){
+      addBox(g,shared.metal,dx,.27,0,.13,.52,.12);
+      addBox(g,shared.metal,dx,.52,.32,.13,1.08,.12);
+    }
+    scene.add(g);
+  }
+  for(const [x,z] of [[-10,-10],[40,-45],[-48,36]]){
+    const g=new T.Group();g.position.set(x,0,z);
+    addBox(g,shared.metal,0,1,0,.8,2,.5);
+    const front=new T.MeshBasicMaterial({color:0xb5b4ac});
+    addBox(g,front,0,1.38,.265,.55,.55,.025);
+    addBox(g,shared.dark,0,.82,.28,.33,.43,.03);
+    addBox(g,shared.wood,0,.25,0,.8,.12,.55);
+    scene.add(g);
+  }
+  // Skyline street haze: warm pools of light without dozens of costly point lights.
+  const haloTexture=(()=>{
+    const c=document.createElement('canvas');c.width=c.height=64;
+    const ctx=c.getContext('2d');
+    const glow=ctx.createRadialGradient(32,32,0,32,32,31);
+    glow.addColorStop(0,'rgba(255,218,150,.48)');
+    glow.addColorStop(.25,'rgba(255,200,130,.18)');
+    glow.addColorStop(1,'rgba(255,200,130,0)');
+    ctx.fillStyle=glow;ctx.fillRect(0,0,64,64);
+    return new T.CanvasTexture(c);
+  })();
+  const haloMat=new T.SpriteMaterial({map:haloTexture,transparent:true,depthWrite:false,color:0xffe2c2});
+  for(const x of [-72,-36,0,36,72])for(const z of [-72,-36,0,36,72]){
+    const halo=new T.Sprite(haloMat);
+    halo.position.set(x+7.25,3.97,z+8.2);
+    halo.scale.set(2.1,2.1,1);scene.add(halo);
+  }
+}
+
 export function cityScene() {
   const scene = new T.Scene();
   scene.background = new T.Color(0x827984);
@@ -225,6 +289,7 @@ export function cityScene() {
     });
     scene.add(mesh);
   }
+  addStreetLife(scene);
   return scene;
 }
 
