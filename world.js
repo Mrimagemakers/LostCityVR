@@ -13,10 +13,103 @@ export function signTexture(width,height) {
   return {ctx,texture};
 }
 
+
+function facadeTexture(baseColor, mortarColor, seed=1) {
+  const c=document.createElement('canvas'); c.width=512;c.height=512;
+  const g=c.getContext('2d');
+  let rnd=seed>>>0;
+  const rand=()=>((rnd=(Math.imul(rnd,1664525)+1013904223)>>>0)/4294967296);
+  g.fillStyle=mortarColor;g.fillRect(0,0,512,512);
+  for(let row=0;row<32;row++) for(let col=-1;col<17;col++) {
+    const x=col*32+(row%2)*16+2,y=row*16+2;
+    const shade=(rand()-.5)*44;
+    const hex=baseColor.map(v=>Math.max(0,Math.min(255,Math.round(v+shade))));
+    g.fillStyle='rgb('+hex.join(',')+')';
+    g.fillRect(x,y,30,13);
+    g.fillStyle='rgba(255,236,208,'+(0.025+rand()*.075)+')';
+    g.fillRect(x,y,30,1);
+    if(rand()<.18) {
+      g.fillStyle='rgba(20,16,16,.12)';
+      g.fillRect(x+rand()*28,y+rand()*10,2+rand()*10,1);
+    }
+  }
+  for(let n=0;n<3600;n++){
+    const x=rand()*512,y=rand()*512;
+    g.fillStyle=rand()<.5?'rgba(255,255,255,.035)':'rgba(0,0,0,.055)';
+    g.fillRect(x,y,1+rand()*2,1+rand()*2);
+  }
+  const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;
+  return t;
+}
+function stoneTexture() {
+  const c=document.createElement('canvas');c.width=c.height=256;
+  const g=c.getContext('2d');g.fillStyle='#66615b';g.fillRect(0,0,256,256);
+  let n=75839;const rand=()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);
+  for(let i=0;i<19000;i++){
+    const v=Math.floor(rand()*170);
+    g.fillStyle='rgba('+v+','+v+','+v+','+(rand()*.14)+')';
+    g.fillRect(rand()*256,rand()*256,1+rand()*3,1+rand()*3);
+  }
+  const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;
+  return t;
+}
+function createDetailSurfaces(scene,buildings) {
+  const brickColors=[[133,75,62],[119,70,61],[151,102,75],[103,75,68],[131,96,79]];
+  const bricks=brickColors.map((c,i)=>facadeTexture(c,'#51463e',i*8127+71));
+  const stone=stoneTexture();
+  const facadeGeo=new T.PlaneGeometry(1,1);
+  const detailMats=bricks.map(t=>new T.MeshStandardMaterial({map:t,roughness:.94,metalness:0,polygonOffset:true,polygonOffsetFactor:-1}));
+  const curbMat=new T.MeshStandardMaterial({map:stone,roughness:1});
+  const glassDark=new T.MeshStandardMaterial({color:0x273641,roughness:.22,metalness:.32});
+  const glassLit=new T.MeshStandardMaterial({color:0xd8a875,emissive:0x9a542b,emissiveIntensity:.4,roughness:.29});
+  const frameMat=new T.MeshStandardMaterial({color:0x403d39,roughness:.85});
+  for(let i=0;i<buildings.length;i++){
+    const b=buildings[i],{x,z,w,h,d,style}=b;
+    const front=new T.Mesh(facadeGeo,detailMats[style%detailMats.length]);
+    front.scale.set(w,h,1);front.position.set(x,h/2,z+d/2+.035);scene.add(front);
+    const rear=front.clone();rear.rotation.y=Math.PI;rear.position.z=z-d/2-.035;scene.add(rear);
+    for(const side of [-1,1]){
+      const wall=front.clone();wall.scale.set(d,h,1);wall.rotation.y=side*Math.PI/2;
+      wall.position.set(x+side*(w/2+.035),h/2,z);scene.add(wall);
+    }
+    for(let level=3.05;level<h-.5;level+=2.35){
+      for(const k of [-1,0,1]){
+        const pane=new T.Mesh(new T.PlaneGeometry(.92,.70),(i+k+Math.round(level))%4?glassDark:glassLit);
+        pane.position.set(x+k*w*.28,level,z+d/2+.115);
+        scene.add(pane);
+        const sill=new T.Mesh(new T.BoxGeometry(1.22,.085,.25),frameMat);
+        sill.position.set(pane.position.x,level-.42,z+d/2+.14);
+        scene.add(sill);
+      }
+    }
+    if(i%5===0){
+      const steps=new T.Mesh(new T.BoxGeometry(2.5,.19,1.2),curbMat);
+      steps.position.set(x,.12,z+d/2+.85);
+      scene.add(steps);
+    }
+  }
+  // A small number of detailed street trees keeps Quest draw calls predictable.
+  const bark=new T.MeshStandardMaterial({color:0x594735,roughness:1});
+  const leaf=new T.MeshStandardMaterial({color:0x344d34,roughness:1,flatShading:false});
+  const trunkGeo=new T.CylinderGeometry(.13,.22,3.7,7);
+  const crownGeo=new T.IcosahedronGeometry(1,1);
+  for(let i=0;i<24;i++){
+    const col=i%6,row=Math.floor(i/6);
+    const x=-76+col*29,z=-77+row*48;
+    const trunk=new T.Mesh(trunkGeo,bark);trunk.position.set(x,1.85,z);scene.add(trunk);
+    for(let j=0;j<3;j++){
+      const crown=new T.Mesh(crownGeo,leaf);
+      crown.scale.set(1.35+j*.12,1.16,1.2);
+      crown.position.set(x+(j-1)*.46,4.05+(j%2)*.55,z+.25*(j-1));
+      scene.add(crown);
+    }
+  }
+}
+
 export function cityScene() {
   const scene = new T.Scene();
-  scene.background = new T.Color(0x987686);
-  scene.fog = new T.Fog(0x987686,47,195);
+  scene.background = new T.Color(0x827984);
+  scene.fog = new T.FogExp2(0x827984,.0048);
   scene.add(new T.HemisphereLight(0xf5d0de,0x716787,2.25));
   const light = new T.DirectionalLight(0xffc19a,2);
   light.position.set(-30,19,-28);
@@ -95,6 +188,7 @@ export function cityScene() {
       }
     }
   }
+  createDetailSurfaces(scene,buildings);
   // Downtown sits below the neighborhood and frames the northbound streets.
   const towers = [
     [-70,-120,17,37],[-52,-133,19,49],[-36,-115,14,36],
