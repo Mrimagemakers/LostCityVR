@@ -59,6 +59,7 @@ function createDetailSurfaces(scene,buildings) {
   const stone=stoneTexture();
   const facadeGeo=new T.PlaneGeometry(1,1);
   const detailMats=bricks.map(t=>new T.MeshStandardMaterial({map:t,roughness:.94,metalness:0,polygonOffset:true,polygonOffsetFactor:-1}));
+  detailMats.forEach((material,i)=>optionalMaterialTexture(material,i%2?'./assets/textures/brick_brown.webp':'./assets/textures/brick_red.webp',4,5));
   const curbMat=new T.MeshStandardMaterial({map:stone,roughness:1});
   const glassDark=new T.MeshStandardMaterial({color:0x273641,roughness:.22,metalness:.32});
   const glassLit=new T.MeshStandardMaterial({color:0xd8a875,emissive:0x9a542b,emissiveIntensity:.4,roughness:.29});
@@ -106,6 +107,43 @@ function createDetailSurfaces(scene,buildings) {
   }
 }
 
+
+
+function optionalMaterialTexture(material,relativeUrl,repeatX=1,repeatY=1) {
+  const loader=new T.TextureLoader();
+  loader.load(relativeUrl,texture=>{
+    texture.colorSpace=T.SRGBColorSpace;
+    texture.wrapS=texture.wrapT=T.RepeatWrapping;
+    texture.repeat.set(repeatX,repeatY);
+    texture.anisotropy=4;
+    material.map=texture;
+    material.color.set(0xffffff);
+    material.needsUpdate=true;
+  },undefined,()=>{/* Keep generated fallback when reference textures are not installed. */});
+}
+function addReferenceSurfaces(scene) {
+  const roadMat=new T.MeshStandardMaterial({color:0x46434a,roughness:.84,metalness:.02,polygonOffset:true,polygonOffsetFactor:-2});
+  optionalMaterialTexture(roadMat,'./assets/textures/concrete_wet.webp',12,12);
+  const roofMat=new T.MeshStandardMaterial({color:0x514b4b,roughness:.94});
+  optionalMaterialTexture(roofMat,'./assets/textures/roof_slate.webp',2,2);
+  // Repeating surface patches sit above the original collision-independent geometry.
+  const horizontal=new T.PlaneGeometry(1,1);
+  const addPavement=(x,z,w,d)=>{
+    const m=new T.Mesh(horizontal,roadMat);m.rotation.x=-Math.PI/2;
+    m.scale.set(w,d,1);m.position.set(x,.034,z);scene.add(m);
+  };
+  for(let n=-2;n<=2;n++){
+    addPavement(n*36,0,12.55,176);
+    addPavement(0,n*36,176,12.55);
+  }
+  const roofBox=new T.BoxGeometry(1,1,1);
+  for(const b of buildings){
+    const slab=new T.Mesh(roofBox,roofMat);
+    slab.position.set(b.x,b.h+.045,b.z);
+    slab.scale.set(b.w+.26,.115,b.d+.26);
+    scene.add(slab);
+  }
+}
 
 function addStreetLife(scene) {
   const shared={
@@ -290,6 +328,7 @@ export function cityScene() {
     scene.add(mesh);
   }
   addStreetLife(scene);
+  addReferenceSurfaces(scene);
   return scene;
 }
 
