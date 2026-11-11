@@ -2,6 +2,7 @@ import * as T from 'three';
 import {buildings, sites, districts, districtAt, extent, distance, turfGoals, rivals, controlsTurf} from './city.js';
 import {currentJob, nearby, restore, saveKey, step, targetSite} from './sim.js';
 import {cityScene, markers, person, signTexture, updateMarker} from './world.js';
+import {createTurfWars} from './turf-wars.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('world');
@@ -54,6 +55,37 @@ const neighbors = [
 });
 
 const state = restore({getItem:key=>localStorage.getItem(key)});
+const battle = createTurfWars({onFinish:({win,forfeit,opponent})=>{
+  running=true;
+  if(!forfeit) {
+    if(win) {
+      const foe=state.foes.filter(e=>distance(state,e)<7).sort((a,b)=>distance(state,a)-distance(state,b))[0];
+      if(foe)state.foes=state.foes.filter(e=>e!==foe);
+      state.cash+=45;state.rep+=1;
+      state.notice=`Turf Wars: Defeated ${opponent}. +$45 · +1 REP`;
+    } else {
+      state.hp=Math.max(15,state.hp-25);
+      state.notice=`Turf Wars: Lost to ${opponent}. -25 health`;
+    }
+    state.seq++;save();
+  }
+  if(!coarse && !xrMode) canvas.requestPointerLock?.()?.catch(()=>{});
+}});
+const battleButton=document.createElement('button');
+battleButton.id='fightChallenge';
+battleButton.textContent='TURF WARS · G';
+battleButton.hidden=true;
+document.body.append(battleButton);
+const fightOpponent={Rook:3,Blacktops:5,'Vice officer':10};
+function launchFight(){
+  if(!running||xrMode||battle.active)return;
+  const foe=state.foes.filter(e=>distance(state,e)<7).sort((a,b)=>distance(state,a)-distance(state,b))[0];
+  if(!foe)return;
+  running=false;keys.clear();buttons.interact=buttons.shove=false;
+  document.exitPointerLock?.();
+  battle.start(fightOpponent[foe.kind]??0);
+}
+battleButton.onclick=launchFight;
 let running=false, entered=false, yaw=0, pitch=0, xrYaw=0, xrMode=false, turnHeld=false;
 let last=0, saveTime=0, nextHUD=0, radioSeq=-1, lastSavedSeq=state.seq;
 const keys=new Set();
@@ -114,6 +146,7 @@ addEventListener('keydown',e=>{
   if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))
     e.preventDefault();
   keys.add(e.code);
+  if(!e.repeat && e.code==='KeyG')launchFight();
   if(!e.repeat && e.code==='KeyE')buttons.interact=true;
   if(!e.repeat && (e.code==='KeyF'||e.code==='Space'))buttons.shove=true;
 });
@@ -359,6 +392,8 @@ renderer.setAnimationLoop((time,frame)=>{
     camera.position.set(0,1.65,0);
     camera.rotation.set(pitch,yaw,0,'YXZ');
   }
+  const foeClose=state.foes.some(e=>distance(state,e)<7);
+  battleButton.hidden=!running||xrMode||!foeClose;
   const target=targetSite(state);
   beacon.position.set(target.x,3.25+Math.sin(time/390)*.24,target.z);
   beacon.rotation.y=time/700;
