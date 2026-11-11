@@ -38,6 +38,10 @@ export function cityScene() {
   }
   for (let x=-54;x<=54;x+=36) for(let z=-54;z<=54;z+=36) {
     box(x,.04,z,23,.1,23,0x66565e);
+    for (const side of [-1,1]) {
+      box(x+side*11.25,.095,z,.42,.12,23,0x8a7875);
+      box(x,.095,z+side*11.25,23,.12,.42,0x8a7875);
+    }
     for (const dx of [-12,12]) for (const dz of [-12,12]) {
       box(x+dx,1.75,z+dz,.12,3.5,.12,0x332d3d);
       box(x+dx,3.52,z+dz,.55,.14,.38,0xffb270,true);
@@ -50,7 +54,9 @@ export function cityScene() {
   }
   for (const [i,b] of buildings.entries()) {
     const {x,z,w,h,d,style}=b;
+    const front=z+d/2;
     box(x,h/2,z,w,h,d,palette[style]);
+    box(x,.29,z,w+.06,.58,d+.06,0x655655);
     box(x,h-.2,z,w+.24,.25,d+.24,0x342d40);
     box(x+.7,h+.32,z-.5,w*.35,.7,d*.31,0x4b414e);
     box(x,1.02,z+d/2+.04,1.38,2.02,.12,0x231e2e);
@@ -60,6 +66,20 @@ export function cityScene() {
       box(x,2.61,z+d/2+.1,w*.81,.52,.17,0x42666a);
       box(x-w*.26,1.35,z+d/2+.04,w*.23,1.45,.09,0xedb786,true);
       box(x+w*.26,1.35,z+d/2+.04,w*.23,1.45,.09,0xedb786,true);
+      const {ctx,texture}=signTexture(512,64);
+      ctx.fillStyle='#e9d6b0';
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      ctx.font='bold 37px sans-serif';
+      const shops=['UPTOWN GROCERY','HILL BARBER SHOP','FIFTH AVE RECORDS','CORNER MARKET'];
+      ctx.fillText(shops[(i/4)%shops.length],256,32,480);
+      texture.needsUpdate=true;
+      const sign=new T.Mesh(new T.PlaneGeometry(w*.78,.46),new T.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false}));
+      sign.position.set(x,2.61,front+.19);
+      scene.add(sign);
+      for (let stripe=-4;stripe<=4;stripe++) {
+        box(x+stripe*w*.09,2.28,front+.43,w*.09,.13,.75,stripe%2?0xb2a08c:0x893f39);
+      }
     }
     for(let y=3.05;y<h-.5;y+=2.35) {
       box(x,y-.69,z,w+.04,.11,d+.04,0x493c4d);
@@ -69,6 +89,9 @@ export function cityScene() {
         box(x+k*w*.28,y,z-d/2,1,.75,.06,color,color===0xe6a27c);
         box(x-w/2,y,z+k*d*.28,.06,.75,1,color,color===0xe6a27c);
         box(x+w/2,y,z+k*d*.28,.06,.75,1,color,color===0xe6a27c);
+        box(x+k*w*.28,y+.43,front+.045,1.25,.12,.13,0xb19b8a);
+        box(x+k*w*.28,y-.43,front+.045,1.25,.12,.13,0x9f8e85);
+        box(x+k*w*.28,y,front+.04,.055,.75,.06,0x504348);
       }
     }
   }

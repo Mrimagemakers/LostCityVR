@@ -33,6 +33,19 @@ button:hover,button:focus-visible{border-color:var(--accent)}
 #save{font:10px ui-monospace,monospace;color:#dbc8c2}
 .gate{z-index:4;display:flex;align-items:center;padding:clamp(20px,8vw,116px);background:linear-gradient(90deg,#15121ffa 8%,#181325d5 38%,#25193250 73%,#21172b20);pointer-events:none}
 .gate[hidden]{display:none}
+body:not(.has-entered) .gate{
+  background:
+    linear-gradient(90deg,#15121ff2 4%,#181325c2 32%,#2519322b 76%),
+    url("https://cdn.openart.ai/openart/thumbnail/production/2026-11/create-image/9HdP1J1Hp7QtIP4rG0sN/02179441116367268bed1fb63597428c3971f167251da48e259d6_1794411208655_91ee9702.webp") center 54% / cover no-repeat;
+}
+@media(max-width:590px){
+  body:not(.has-entered) .gate{
+    background-position:center,58% center;
+    background-image:
+      linear-gradient(90deg,#15121fdf,#15121f73),
+      url("https://cdn.openart.ai/openart/thumbnail/production/2026-11/create-image/9HdP1J1Hp7QtIP4rG0sN/02179441116367268bed1fb63597428c3971f167251da48e259d6_1794411208655_91ee9702.webp");
+  }
+}
 .intro{max-width:380px;pointer-events:auto}
 h1{font-weight:1000;line-height:.75;letter-spacing:-.08em;font-size:clamp(72px,16vw,150px);margin:.25em 0;text-shadow:0 6px 35px #10091a}
 h1 em{font-style:normal;color:var(--accent)}

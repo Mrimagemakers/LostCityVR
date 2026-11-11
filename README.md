@@ -4,6 +4,8 @@ A first-person, single-player Three.js and WebXR prototype. Explore three contig
 
 The 1995 setting draws on Pittsburgh's Uptown and Hill District. Low brick buildings and corner storefronts frame a distant downtown skyline. The street grid and districts are fictional, and the skyline is scenery beyond the walkable map.
 
+The title screen uses original OpenArt key art from Seedream 5.5, creation `216oKdRSJpONcQB37RlF`. The image is served from OpenArt's CDN. If it is unavailable, the live 3D scene shows behind the title.
+
 ## Play locally
 
 Open a terminal in the **Lost City** project folder. With Node.js installed, run:

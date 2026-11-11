@@ -86,7 +86,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden && entered)
 function play(lock=true) {
   entered=running=true;
   $('gate').hidden=true;
-  document.body.classList.add('playing');
+  document.body.classList.add('playing','has-entered');
   if(lock && !coarse && document.pointerLockElement!==canvas) {
     try { canvas.requestPointerLock?.()?.catch(()=>{}); } catch { /* Drag-look remains available. */ }
   }
