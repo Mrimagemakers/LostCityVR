@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#151622">
+  <title>Lost City</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+  <canvas id="world" aria-label="Lost City first-person view"></canvas>
+  <div class="edge"></div>
+  <header>
+    <div class="brand">LOST<span>CITY</span><small id="district">Market Ward</small></div>
+    <div class="stats"><div>CASH<strong id="cash">$0</strong></div><div>REP<strong id="rep">0</strong></div><div>HEALTH<strong id="health">100</strong></div></div>
+  </header>
+  <aside class="brief">
+    <span class="eyebrow">ACTIVE JOB</span>
+    <h2 id="job">Night Shift</h2>
+    <div id="goal">Meet Mara at dispatch</div>
+    <div id="range"></div>
+  </aside>
+  <div class="radar"><canvas id="map" width="160" height="160" aria-label="District map"></canvas><div id="turf"></div></div>
+  <div id="crosshair" aria-hidden="true"></div>
+  <div id="prompt"></div>
+  <section class="radio" aria-live="polite"><span class="eyebrow">RADIO</span><p id="notice"></p></section>
+  <div class="touch" aria-label="Touch controls">
+    <div id="stick"><i></i></div>
+    <div class="actions"><button id="run">RUN</button><button id="shove">SHOVE</button><button id="use">USE</button></div>
+  </div>
+  <footer><button id="help" aria-label="Controls and pause">?</button><div id="vr"></div><span id="save"></span></footer>
+  <div id="gate" class="gate">
+    <div class="intro">
+      <div class="eyebrow">PITTSBURGH-INSPIRED · 1995</div>
+      <h1>LOST<br><em>CITY</em></h1>
+      <p>Pick up work at dispatch. Make your name one block at a time.</p>
+      <button id="enter" disabled>LOADING CITY…</button>
+      <div id="controls">WASD to move · mouse to look · E to interact<br>Shift to run · F to shove · Esc to release mouse</div>
+      <div id="load-error" role="alert"></div>
+    </div>
+  </div>
+  <script type="module">
+    import('./main.js').catch(error => {
+      console.error(error);
+      document.querySelector('#load-error').textContent = 'Could not load Lost City. Check your connection and browser WebGL support, then reload.';
+    });
+  </script>
+</body>
+</html>

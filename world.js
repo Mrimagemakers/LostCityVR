@@ -1,0 +1,176 @@
+import * as T from 'three';
+import {buildings, sites} from './city.js';
+
+const cube = new T.BoxGeometry(1,1,1);
+const palette = [0x8e5446,0x75453d,0x9e6a51,0x6a4943,0x856255];
+const gold = 0xffcc66;
+
+export function signTexture(width,height) {
+  const canvas = Object.assign(document.createElement('canvas'),{width,height});
+  const ctx = canvas.getContext('2d');
+  const texture = new T.CanvasTexture(canvas);
+  texture.colorSpace = T.SRGBColorSpace;
+  return {ctx,texture};
+}
+
+export function cityScene() {
+  const scene = new T.Scene();
+  scene.background = new T.Color(0x987686);
+  scene.fog = new T.Fog(0x987686,47,195);
+  scene.add(new T.HemisphereLight(0xf5d0de,0x716787,2.25));
+  const light = new T.DirectionalLight(0xffc19a,2);
+  light.position.set(-30,19,-28);
+  scene.add(light);
+
+  const opaque = [], glow = [];
+  const box = (x,y,z,w,h,d,color,lit=false) => (lit?glow:opaque).push([x,y,z,w,h,d,color]);
+  box(0,-.17,0,178,.3,178,0x373644);
+  for (let i=-2;i<=2;i++) {
+    const c = i*36;
+    box(c,.005,0,13,.02,176,0x2a2936);
+    box(0,.006,c,176,.02,13,0x2a2936);
+    for (let j=-84;j<=84;j+=4) {
+      if (Math.abs(j-Math.round(j/36)*36)>7) {
+        box(c,.024,j,.08,.015,1.65,0xb48259);
+        box(j,.024,c,1.65,.015,.08,0xb48259);
+      }
+    }
+  }
+  for (let x=-54;x<=54;x+=36) for(let z=-54;z<=54;z+=36) {
+    box(x,.04,z,23,.1,23,0x66565e);
+    for (const dx of [-12,12]) for (const dz of [-12,12]) {
+      box(x+dx,1.75,z+dz,.12,3.5,.12,0x332d3d);
+      box(x+dx,3.52,z+dz,.55,.14,.38,0xffb270,true);
+      box(x+dx,.024,z+dz,1.9,.018,1.9,0x72564d);
+    }
+    for(let line=-2;line<=2;line++) {
+      box(x-18+line*.75,.026,z+12,.32,.016,2,0x9a8184);
+      box(x+12,.026,z-18+line*.75,2,.016,.32,0x9a8184);
+    }
+  }
+  for (const [i,b] of buildings.entries()) {
+    const {x,z,w,h,d,style}=b;
+    box(x,h/2,z,w,h,d,palette[style]);
+    box(x,h-.2,z,w+.24,.25,d+.24,0x342d40);
+    box(x+.7,h+.32,z-.5,w*.35,.7,d*.31,0x4b414e);
+    box(x,1.02,z+d/2+.04,1.38,2.02,.12,0x231e2e);
+    box(x,2.25,z+d/2+.24,2.3,.12,.57,i%4?0xa38368:0xc96447);
+    box(x,.13,z+d/2+.24,1.85,.26,.5,0x84716b);
+    if (i%4===0) {
+      box(x,2.61,z+d/2+.1,w*.81,.52,.17,0x42666a);
+      box(x-w*.26,1.35,z+d/2+.04,w*.23,1.45,.09,0xedb786,true);
+      box(x+w*.26,1.35,z+d/2+.04,w*.23,1.45,.09,0xedb786,true);
+    }
+    for(let y=3.05;y<h-.5;y+=2.35) {
+      box(x,y-.69,z,w+.04,.11,d+.04,0x493c4d);
+      for(let k=-1;k<=1;k++) {
+        const color = (i+k+Math.round(y))%4 ? 0x39324b : 0xe6a27c;
+        box(x+k*w*.28,y,z+d/2,1,.75,.06,color,color===0xe6a27c);
+        box(x+k*w*.28,y,z-d/2,1,.75,.06,color,color===0xe6a27c);
+        box(x-w/2,y,z+k*d*.28,.06,.75,1,color,color===0xe6a27c);
+        box(x+w/2,y,z+k*d*.28,.06,.75,1,color,color===0xe6a27c);
+      }
+    }
+  }
+  // Downtown sits below the neighborhood and frames the northbound streets.
+  const towers = [
+    [-70,-120,17,37],[-52,-133,19,49],[-36,-115,14,36],
+    [-24,-142,20,63],[-9,-121,14,48],[4,-138,16,75],
+    [19,-118,11,46],[33,-142,21,56],[50,-123,14,39],
+    [65,-137,19,51],[83,-117,18,31],
+  ];
+  for (const [i,[x,z,w,h]] of towers.entries()) {
+    box(x,h/2-8,z,w,h,15,i%2?0x474b63:0x56475b);
+    box(x,h-6,z,w*.63,4,11,0x494254);
+    for (let floor=9;floor<h-10;floor+=4) {
+      for (let column=-1;column<=1;column++) {
+        if ((floor+column+i)%5!==0) {
+          box(x+column*w*.29,floor,z+7.53,w*.12,.65,.1,0xd7a47e,true);
+        }
+      }
+    }
+  }
+  box(4,72,-138,.28,7,.28,0xb0959b,true);
+  box(-24,59,-142,4,5,4,0x494254);
+  const moon = new T.Mesh(new T.SphereGeometry(7,24,12),new T.MeshBasicMaterial({color:0xffb79b,fog:false}));
+  moon.position.set(39,29,-119);
+  scene.add(moon);
+  const dummy = new T.Object3D();
+  const tint = new T.Color();
+  for(const [batch,mat] of [[opaque,new T.MeshLambertMaterial()],[glow,new T.MeshBasicMaterial()]]) {
+    const mesh = new T.InstancedMesh(cube,mat,batch.length);
+    batch.forEach(([x,y,z,w,h,d,color],i)=>{
+      dummy.position.set(x,y,z);
+      dummy.scale.set(w,h,d);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i,dummy.matrix);
+      mesh.setColorAt(i,tint.set(color));
+    });
+    scene.add(mesh);
+  }
+  return scene;
+}
+
+export function person(color) {
+  const group = new T.Group();
+  const limbs = [];
+  function part(x,y,z,w,h,d,tint) {
+    const mesh = new T.Mesh(cube,new T.MeshLambertMaterial({color:tint}));
+    mesh.position.set(x,y,z);
+    mesh.scale.set(w,h,d);
+    group.add(mesh);
+    return mesh;
+  }
+  part(0,1.19,0,.49,.58,.31,color);
+  part(0,1.66,0,.29,.31,.27,0xa87666);
+  part(0,1.83,.01,.34,.09,.31,0x282431);
+  for(const side of [-1,1]) {
+    limbs.push(part(side*.13,.39,0,.19,.7,.23,0x303145));
+    limbs.push(part(side*.32,1.15,0,.14,.55,.17,color));
+  }
+  group.userData.limbs = limbs;
+  return group;
+}
+
+export function markers(scene) {
+  return sites.map((site,i)=>{
+    const group = new T.Group();
+    group.position.set(site.x,0,site.z);
+    const color = site.price?0x72e2ce:0xf1abaf;
+    const ring = new T.Mesh(new T.RingGeometry(1.43,1.52,32),new T.MeshBasicMaterial({color,side:T.DoubleSide}));
+    ring.rotation.x=-Math.PI/2;
+    ring.position.y=.045;
+    group.add(ring);
+    const actor = site.price || site.id==='parcel' || site.id==='relay' ? new T.Mesh(cube,new T.MeshLambertMaterial({color})) : person([0x845783,0x426b72,0x778d81,0x8f4f55][i]);
+    if (!actor.isGroup) {
+      actor.scale.set(.62,.48,.48);
+      actor.position.y=.24;
+    }
+    group.add(actor);
+    const {ctx,texture} = signTexture(512,128);
+    const sprite = new T.Sprite(new T.SpriteMaterial({map:texture,depthWrite:false}));
+    sprite.position.y=2.45;
+    sprite.scale.set(4.1,1.025,1);
+    group.add(sprite);
+    scene.add(group);
+    return {site,ring,sprite,ctx,texture,color,status:null};
+  });
+}
+
+export function updateMarker(marker,status) {
+  if(marker.status===status)return;
+  marker.status=status;
+  const {ctx,texture,ring,site,color}=marker;
+  ring.material.color.set(status==='MISSION'?gold:color);
+  ctx.clearRect(0,0,512,128);
+  ctx.fillStyle='#1b1728';
+  ctx.fillRect(6,10,500,104);
+  ctx.fillStyle=status==='MISSION'?'#ffcc66':site.price?'#72e2ce':'#f1abaf';
+  ctx.fillRect(6,10,500,5);
+  ctx.textAlign='center';
+  ctx.font='bold 35px sans-serif';
+  ctx.fillText(site.name,256,60,476);
+  ctx.font='bold 22px monospace';
+  ctx.fillText(status,256,92,476);
+  texture.needsUpdate=true;
+}
